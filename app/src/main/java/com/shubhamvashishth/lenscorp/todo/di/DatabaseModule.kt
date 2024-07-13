@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.shubhamvashishth.lenscorp.todo.data.dao.TaskDao
 import com.shubhamvashishth.lenscorp.todo.data.database.TaskDatabase
+import com.shubhamvashishth.lenscorp.todo.data.repository.TaskRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,8 +27,15 @@ class DatabaseModule {
     }
 
     @Provides
+    @Singleton
     fun provideTaskDao(database: TaskDatabase): TaskDao {
         return database.taskDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTaskRepository(taskDao: TaskDao): TaskRepository{
+        return TaskRepository(taskDao)
     }
 
 }

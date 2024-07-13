@@ -86,7 +86,7 @@ fun HomeScreen(navController: NavController) {
                         AnimatedVisibility(
                             visible = isVisible,
                             enter = slideInVertically(
-                                initialOffsetY = { fullHeight -> fullHeight },
+                                initialOffsetY = { fullHeight -> fullHeight/2 },
                                 animationSpec = tween(durationMillis = 300)
                             ),
                             exit = slideOutVertically(
@@ -108,6 +108,7 @@ fun HomeScreen(navController: NavController) {
                                     }
                                 },
                                 onCardClick = {
+                                    navController.navigate("edit/${task.taskId}")
                                     // Handle card click
                                 }
                             )

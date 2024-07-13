@@ -104,6 +104,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation("androidx.compose.material:material:1.6.8")
 
+    implementation ("androidx.biometric:biometric:1.1.0")
+
 
 
 }

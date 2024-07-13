@@ -2,6 +2,7 @@ package com.shubhamvashishth.lenscorp.todo.ui.common
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,22 +29,41 @@ import java.util.*
 
 @Composable
 fun TodoTaskForm(
-  //  onLocationSelected: (LatLng) -> Unit,
+    //  onLocationSelected: (LatLng) -> Unit,
+    task: TodoTask? = null,
     isEditable: Boolean = true,
     toggleVisibility: Boolean = true,
     onSave: (TodoTask) -> Unit,
     onCancel: () -> Unit,
 ) {
-    var taskPriority by remember { mutableStateOf(Priority.LOW) }
-    var title by remember { mutableStateOf(TextFieldValue("")) }
-    var dueDate by remember { mutableStateOf<Date?>(null) }
-    var description by remember { mutableStateOf(TextFieldValue("")) }
-  //  var location by remember { mutableStateOf<LatLng?>(null) }
-    var editMode by remember { mutableStateOf(isEditable) }
+    Log.d("oks", task.toString())
+    var taskPriority by remember(task?.hashCode()) {
+        mutableStateOf(
+            task?.taskPriority ?: Priority.LOW
+        )
+    }
+    var title by remember(task?.hashCode()) { mutableStateOf(TextFieldValue(task?.title ?: "")) }
+    var dueDate by remember(task?.hashCode()) { mutableStateOf<Date?>(task?.dueDate) }
+    var description by remember(task?.hashCode()) {
+        mutableStateOf(
+            TextFieldValue(
+                task?.description ?: ""
+            )
+        )
+    }
+    //  var location by remember { mutableStateOf<LatLng?>(null) }
+    var editMode by remember(task?.hashCode()) { mutableStateOf(isEditable) }
+    var taskId by remember(task?.hashCode()) { mutableStateOf(task?.taskId?:0) }
 
-    Column(modifier = Modifier
-        .padding(16.dp)
-        .fillMaxSize()
+
+
+    Log.d("oks", title.toString())
+
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize()
     ) {
         if (toggleVisibility) {
             Row(
@@ -69,7 +89,14 @@ fun TodoTaskForm(
                         )
                     }
                     IconButton(onClick = {
-                        var task = TodoTask(taskPriority,title.text,dueDate?:Date(), description.text, false, "Empty")
+                        var task = TodoTask(
+                            taskPriority,
+                            title.text,
+                            dueDate ?: Date(),
+                            description.text,
+                            false,
+                            "Empty"
+                        )
                         onSave.invoke(task)
 
                     }) {
@@ -83,7 +110,11 @@ fun TodoTaskForm(
             }
         }
 
-        DropdownMenuPriority(priority = taskPriority, onPrioritySelected = { taskPriority = it }, enabled = editMode)
+        DropdownMenuPriority(
+            priority = taskPriority,
+            onPrioritySelected = { taskPriority = it },
+            enabled = editMode
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -128,7 +159,15 @@ fun TodoTaskForm(
 
         Button(
             onClick = {
-                var task = TodoTask(taskPriority,title.text,dueDate?:Date(), description.text, false, "Empty")
+                var task = TodoTask(
+                    taskPriority,
+                    title.text,
+                    dueDate ?: Date(),
+                    description.text,
+                    false,
+                    "Empty",
+                    taskId
+                )
                 onSave.invoke(task)
                 // onLocationSelected(selectedLocation) - handle location selected
             },
@@ -145,7 +184,11 @@ fun TodoTaskForm(
 }
 
 @Composable
-fun DropdownMenuPriority(priority: Priority, onPrioritySelected: (Priority) -> Unit, enabled: Boolean) {
+fun DropdownMenuPriority(
+    priority: Priority,
+    onPrioritySelected: (Priority) -> Unit,
+    enabled: Boolean
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxWidth()) {

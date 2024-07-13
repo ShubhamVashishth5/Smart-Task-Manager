@@ -1,10 +1,15 @@
 package com.shubhamvashishth.lenscorp.todo
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,16 +23,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.shubhamvashishth.lenscorp.todo.ui.common.BottomBar
@@ -37,7 +46,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //enableEdgeToEdge()
@@ -47,12 +56,58 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+
 }
 
+private fun isBiometricAvailable(context: Context): Boolean {
+    val biometricManager = BiometricManager.from(context)
+    return when (biometricManager.canAuthenticate()) {
+        BiometricManager.BIOMETRIC_SUCCESS -> true
+        else -> false
+    }
+}
+
+private fun showBiometricPrompt(context: Context) {
+    val executor = ContextCompat.getMainExecutor(context)
+
+    val biometricPrompt = BiometricPrompt(context as FragmentActivity, executor, object : BiometricPrompt.AuthenticationCallback() {
+        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+            super.onAuthenticationError(errorCode, errString)
+            // Handle error
+        }
+
+        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+            super.onAuthenticationSucceeded(result)
+            // Handle success
+        }
+
+        override fun onAuthenticationFailed() {
+            super.onAuthenticationFailed()
+            // Handle failure
+
+        }
+    })
+
+    val promptInfo = BiometricPrompt.PromptInfo.Builder()
+        .setTitle("Biometric Authentication")
+        .setSubtitle("Log in using your biometric credential")
+        .setNegativeButtonText("Use account password")
+        .build()
+
+    biometricPrompt.authenticate(promptInfo)
+}
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen() {
+    val context = LocalContext.current as FragmentActivity
+
+    LaunchedEffect(Unit) {
+        if (isBiometricAvailable(context)) {
+            showBiometricPrompt(context)
+        }
+    }
     val navController = rememberNavController()
     Scaffold(
         bottomBar = {
@@ -65,6 +120,8 @@ fun MainScreen() {
                 FloatingActionButton(
                     onClick = {
                         // Handle FAB click
+                        navController.navigate("add")
+
                     },
                     modifier = Modifier
                         .padding(16.dp)
