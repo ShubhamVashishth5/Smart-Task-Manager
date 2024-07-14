@@ -1,7 +1,11 @@
 package com.shubhamvashishth.lenscorp.todo
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -35,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
@@ -49,6 +54,21 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "task_notifications",
+                "Task Notifications",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Channel for task notifications"
+            }
+
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
+        }
+        //sendTestNotification()
+
         //enableEdgeToEdge()
         setContent {
             SmartTaskManagerTheme {
@@ -56,6 +76,29 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
+    private fun sendTestNotification() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channelId = "task_notifications"
+
+        val intent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Test Notification")
+            .setContentText("This is a test notification to verify channel setup.")
+            .setSmallIcon(R.drawable.ic_launcher_background) // Ensure you have this drawable resource
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(1, notification)
+    }
+
 
 
 }

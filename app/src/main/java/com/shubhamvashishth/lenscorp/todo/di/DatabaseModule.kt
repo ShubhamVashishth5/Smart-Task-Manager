@@ -3,6 +3,7 @@ package com.shubhamvashishth.lenscorp.todo.di
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
+import androidx.work.WorkerFactory
 import com.shubhamvashishth.lenscorp.todo.data.dao.TaskDao
 import com.shubhamvashishth.lenscorp.todo.data.database.TaskDatabase
 import com.shubhamvashishth.lenscorp.todo.data.repository.TaskRepository
@@ -11,6 +12,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -44,5 +46,14 @@ class DatabaseModule {
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences("settings_prefs", Context.MODE_PRIVATE)
     }
+
+//    @Provides
+//    @Singleton
+//    fun provideWorkerFactory(
+//        taskRepositoryProvider: Provider<TaskRepository>
+//    ): WorkerFactory {
+//        return NotificationWorkerFactory(taskRepositoryProvider)
+//    }
+
 
 }

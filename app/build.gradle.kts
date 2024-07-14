@@ -79,6 +79,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
+    implementation(libs.androidx.work.runtime.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -108,6 +111,7 @@ dependencies {
 
     implementation(libs.compose.m3)
     implementation("io.github.dautovicharis:charts:1.3.1")
+    implementation ("com.adevinta.android:leku:11.1.4")
 
 
 

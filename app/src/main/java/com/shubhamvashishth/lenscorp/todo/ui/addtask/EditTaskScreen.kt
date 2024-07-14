@@ -26,6 +26,6 @@ fun EditTaskScreen(navController: NavController, id: Int){
 
     }, onCancel = {
         navController.popBackStack()
-    })
+    }, onLocationClicked = {})
 
 }

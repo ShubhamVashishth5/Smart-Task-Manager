@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.model.LatLng
 import com.shubhamvashishth.lenscorp.todo.data.model.Priority
 import com.shubhamvashishth.lenscorp.todo.data.model.TodoTask
 //import com.google.android.gms.maps.model.LatLng
@@ -35,6 +36,9 @@ fun TodoTaskForm(
     toggleVisibility: Boolean = true,
     onSave: (TodoTask) -> Unit,
     onCancel: () -> Unit,
+    onLocationClicked: () -> Unit,
+    location: String="",
+    latLng: LatLng= LatLng(0.0,0.0)
 ) {
     Log.d("oks", task.toString())
     var taskPriority by remember(task?.hashCode()) {
@@ -95,7 +99,8 @@ fun TodoTaskForm(
                             dueDate ?: Date(),
                             description.text,
                             false,
-                            "Empty"
+                            location,
+                            latLng
                         )
                         onSave.invoke(task)
 
@@ -146,6 +151,7 @@ fun TodoTaskForm(
 
         Button(
             onClick = {
+                onLocationClicked.invoke()
                 // Launch Leku Location Picker
                 // onLocationSelected(selectedLocation) - handle location selected
             },
@@ -155,31 +161,11 @@ fun TodoTaskForm(
             Text("Pick Location")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                var task = TodoTask(
-                    taskPriority,
-                    title.text,
-                    dueDate ?: Date(),
-                    description.text,
-                    false,
-                    "Empty",
-                    taskId
-                )
-                onSave.invoke(task)
-                // onLocationSelected(selectedLocation) - handle location selected
-            },
-            enabled = editMode,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Save")
+        latLng?.let {
+            Text("Selected Location: ${it.latitude}, ${it.longitude} + $location", style = MaterialTheme.typography.body1)
         }
 
-//        location?.let {
-//            Text("Selected Location: ${it.latitude}, ${it.longitude}", style = MaterialTheme.typography.body1)
-//        }
     }
 }
 
