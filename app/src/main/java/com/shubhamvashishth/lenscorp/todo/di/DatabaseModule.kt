@@ -1,6 +1,7 @@
 package com.shubhamvashishth.lenscorp.todo.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.shubhamvashishth.lenscorp.todo.data.dao.TaskDao
 import com.shubhamvashishth.lenscorp.todo.data.database.TaskDatabase
@@ -36,6 +37,12 @@ class DatabaseModule {
     @Singleton
     fun provideTaskRepository(taskDao: TaskDao): TaskRepository{
         return TaskRepository(taskDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences("settings_prefs", Context.MODE_PRIVATE)
     }
 
 }

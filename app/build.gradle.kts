@@ -106,6 +106,11 @@ dependencies {
 
     implementation ("androidx.biometric:biometric:1.1.0")
 
+    implementation(libs.compose.m3)
+    implementation("io.github.dautovicharis:charts:1.3.1")
+
+
+
 
 
 }
