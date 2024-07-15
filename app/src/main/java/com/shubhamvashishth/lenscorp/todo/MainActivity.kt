@@ -66,7 +66,7 @@ class MainActivity : FragmentActivity() {
 
 
         setContent {
-            SmartTaskManagerTheme {
+            SmartTaskManagerTheme(darkTheme = false) {
                MainScreen()
             }
         }

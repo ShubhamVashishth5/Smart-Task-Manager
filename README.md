@@ -33,3 +33,5 @@ Import project in android studio and run on emulator or device
 [App Demo](https://www.youtube.com/watch?v=M2bRYKTXCo4)
 
 [Permission and push notification demo (only local push notifications)](https://www.youtube.com/watch?v=hPlivd74gWA)
+
+[Link to last built apk](https://drive.google.com/drive/folders/1FDvcRyhK3AufjLrokbO2KBkhzLBp__wS?usp=sharing)
