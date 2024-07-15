@@ -7,7 +7,7 @@
 4. AndroidX biometri
 5. Charts : implementation("io.github.dautovicharis:charts:1.3.1")
 6. Leku for location picker:  implementation ("com.adevinta.android:leku:11.1.4")
-7. Google Maps API, Places API, Geolocation API
+7. Google Maps API, Places API, Geolocation API (To setup geofences for location based reminders)
 8. Material UI 
 
 ### Build and run
@@ -19,6 +19,7 @@ Generated output apk can be found in \app\build\outputs\apk\debug
 Or 
 
 Import project in android studio and run on emulator or device
+#### Recommended : Run after running the app, in android studio app inspector, run the query given in queries.txt to populate the tasks quickly instead of manually adding all tasks.
 
 
 ### Design
