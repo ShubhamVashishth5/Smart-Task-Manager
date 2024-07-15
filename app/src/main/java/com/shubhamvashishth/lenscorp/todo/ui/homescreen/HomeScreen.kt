@@ -28,6 +28,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -79,54 +81,68 @@ fun HomeScreen(navController: NavController) {
     ) {
 
         Box(modifier = Modifier.fillMaxSize()) {
-            LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Adaptive((LocalConfiguration.current.screenWidthDp/2.2).dp),
-                verticalItemSpacing = 4.dp,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                content = {
-                    taskList.forEach { task ->
+            if (taskList.isNotEmpty()) {
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Adaptive((LocalConfiguration.current.screenWidthDp / 2.2).dp),
+                    verticalItemSpacing = 4.dp,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    content = {
+                        taskList.forEach { task ->
 
-                        item(key = task.hashCode()) {
-                            var isVisible by remember { mutableStateOf(true) }
+                            item(key = task.hashCode()) {
+                                var isVisible by remember { mutableStateOf(true) }
 
-                            AnimatedVisibility(
-                                visible = isVisible,
-                                enter = slideInVertically(
-                                    initialOffsetY = { fullHeight -> fullHeight / 2 },
-                                    animationSpec = tween(durationMillis = 300)
-                                ),
-                                exit = slideOutVertically(
-                                    targetOffsetY = { fullHeight -> fullHeight },
-                                    animationSpec = tween(durationMillis = 300)
-                                )
-                            ) {
-                                TaskCard(
-                                    title = task.title,
-                                    dateTime = formatDate(task.dueDate),
-                                    priority = task.taskPriority,
-                                    description = task.description,
-                                    location = task.location,
-                                    onCheckboxChange = {
-                                        coroutineScope.launch {
-                                         //   isVisible = false
-                                            delay(300) // Match the duration of the exit animation
-                                            viewModel.deleteTodoTask(task) // Remove the task after animation completes
-                                        }
-                                    },
-                                    onCardClick = {
-                                        navController.navigate("edit/${task.taskId}")
-                                        // Handle card click
-                                    },
-                                    isDefaultChecked = task.isCompleted
-                                )
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = slideInVertically(
+                                        initialOffsetY = { fullHeight -> fullHeight / 2 },
+                                        animationSpec = tween(durationMillis = 300)
+                                    ),
+                                    exit = slideOutVertically(
+                                        targetOffsetY = { fullHeight -> fullHeight },
+                                        animationSpec = tween(durationMillis = 300)
+                                    )
+                                ) {
+                                    TaskCard(
+                                        title = task.title,
+                                        dateTime = formatDate(task.dueDate),
+                                        priority = task.taskPriority,
+                                        description = task.description,
+                                        location = task.location,
+                                        onCheckboxChange = {
+                                            coroutineScope.launch {
+                                                delay(300) // Match the duration of the exit animation
+                                                viewModel.deleteTodoTask(task) // Remove the task after animation completes
+                                            }
+                                        },
+                                        onCardClick = {
+                                            navController.navigate("edit/${task.taskId}")
+                                            // Handle card click
+                                        },
+                                        isDefaultChecked = task.isCompleted
+                                    )
+                                }
                             }
                         }
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Add some tasks to see them here",
+                        style = MaterialTheme.typography.body1,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         }
+
 
 
     }
