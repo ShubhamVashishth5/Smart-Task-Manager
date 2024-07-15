@@ -13,7 +13,7 @@ data class TodoTask(
     @ColumnInfo val title: String,
     @ColumnInfo val dueDate: Date,
     @ColumnInfo val description: String,
-    @ColumnInfo val isCompleted: Boolean,
+    @ColumnInfo var isCompleted: Boolean,
     @ColumnInfo val location: String,
     @ColumnInfo val latLng: LatLng,
     @PrimaryKey(autoGenerate = true) val taskId: Int = 0

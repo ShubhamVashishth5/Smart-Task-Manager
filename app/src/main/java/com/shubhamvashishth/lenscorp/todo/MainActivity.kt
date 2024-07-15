@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,7 +44,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingRequest
+import com.google.android.gms.location.LocationServices
 import com.shubhamvashishth.lenscorp.todo.ui.common.BottomBar
 import com.shubhamvashishth.lenscorp.todo.ui.navigation.SetupNavGraph
 import com.shubhamvashishth.lenscorp.todo.ui.theme.SmartTaskManagerTheme
@@ -68,6 +73,40 @@ class MainActivity : FragmentActivity() {
             notificationManager.createNotificationChannel(channel)
         }
         //sendTestNotification()
+
+
+//
+//        val geofence = Geofence.Builder()
+//            .setRequestId("geofence_id")
+//            .setCircularRegion(28.6969,77.2938, 100f) // Increased radius for testing
+//            .setExpirationDuration(Geofence.NEVER_EXPIRE)
+//            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+//            .build()
+//
+//        val geofencingRequest = GeofencingRequest.Builder()
+//            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+//            .addGeofence(geofence)
+//            .build()
+//
+//        val geofencePendingIntent: PendingIntent = PendingIntent.getBroadcast(
+//            this,
+//            0,
+//            Intent(this, GeofenceBroadcastReceiver::class.java).apply {
+//                action = "com.google.android.gms.location.Geofence"
+//            },
+//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+//        )
+//
+//
+//        val geofencingClient = LocationServices.getGeofencingClient(this)
+//        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)
+//            .addOnSuccessListener {
+//                Log.d("Geofence", "Geofence added successfully")
+//            }
+//            .addOnFailureListener { e ->
+//                Log.e("Geofence", "Failed to add geofence", e)
+//            }
+
 
         //enableEdgeToEdge()
         setContent {
@@ -152,14 +191,18 @@ fun MainScreen() {
         }
     }
     val navController = rememberNavController()
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination?.route
+    Log.d("ok",currentDestination.toString())
+
+
     Scaffold(
         bottomBar = {
             BottomBar(navController = navController) },
-        topBar = {
-            TopAppBar(navController = navController)
-        },
-                floatingActionButton = {
 
+                floatingActionButton = {
+                    if (shouldShowFab(currentDestination)) {
                 FloatingActionButton(
                     onClick = {
                         // Handle FAB click
@@ -170,14 +213,14 @@ fun MainScreen() {
                         .padding(16.dp)
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = "Add Task")
-                }
+                }}
 
         }
 
     ) {
             paddingValues ->
         // Apply padding manually
-        Box(modifier = Modifier.padding(top = 50.dp)) {
+        Box(modifier = Modifier.padding(bottom = 40.dp)) {
             SetupNavGraph(navHostController = navController)
         }
     }
@@ -195,4 +238,10 @@ fun TopAppBar(navController: NavHostController){
             //  TextField(value = ok, onValueChange = { ok= it } )
         }
     }
+}
+
+
+fun shouldShowFab(currentDestination: String?): Boolean {
+    val fabVisibleDestinations = listOf("home_screen") // Add paths where FAB should be visible
+    return currentDestination in fabVisibleDestinations
 }

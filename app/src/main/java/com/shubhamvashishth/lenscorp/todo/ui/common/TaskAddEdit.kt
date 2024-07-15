@@ -47,7 +47,7 @@ fun TodoTaskForm(
         )
     }
     var title by remember(task?.hashCode()) { mutableStateOf(TextFieldValue(task?.title ?: "")) }
-    var dueDate by remember(task?.hashCode()) { mutableStateOf<Date?>(task?.dueDate) }
+    var dueDate by remember(task?.hashCode()) { mutableStateOf<Date>(task?.dueDate?:Date()) }
     var description by remember(task?.hashCode()) {
         mutableStateOf(
             TextFieldValue(
@@ -74,17 +74,17 @@ fun TodoTaskForm(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row {
-                    IconButton(onClick = { editMode = !editMode }) {
-                        Icon(
-                            Icons.Filled.Edit,
-                            contentDescription = if (editMode) "View Mode" else "Edit Mode",
-                            tint = if (editMode) Color.Blue else Color.Gray
-                        )
-                    }
+//                    IconButton(onClick = { editMode = !editMode }) {
+//                        Icon(
+//                            Icons.Filled.Edit,
+//                            contentDescription = if (editMode) "View Mode" else "Edit Mode",
+//                            tint = if (editMode) Color.Blue else Color.Gray
+//                        )
+//                    }
                     IconButton(onClick = { onCancel() }) {
                         Icon(
                             Icons.Filled.Close,
@@ -92,7 +92,22 @@ fun TodoTaskForm(
                             tint = Color.Red
                         )
                     }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 16.dp).align(Alignment.CenterVertically),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if(task==null) "Add task" else "Edit task",
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+
                     IconButton(onClick = {
+                        if(title.text.length==0){
+
+                        }
                         var task = TodoTask(
                             taskPriority,
                             title.text,
@@ -163,7 +178,7 @@ fun TodoTaskForm(
 
 
         latLng?.let {
-            Text("Selected Location: ${it.latitude}, ${it.longitude} + $location", style = MaterialTheme.typography.body1)
+            Text("Selected Location: $location", style = MaterialTheme.typography.body1)
         }
 
     }
@@ -194,7 +209,7 @@ fun DropdownMenuPriority(
                     onPrioritySelected(priorityOption)
                     expanded = false
                 }) {
-                    Text(priorityOption.name)
+                    Text(priorityOption.name )
                 }
             }
         }

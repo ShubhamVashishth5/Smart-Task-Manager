@@ -12,6 +12,9 @@ import com.shubhamvashishth.lenscorp.todo.data.repository.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,18 +22,45 @@ class HomScreenViewModel @Inject constructor(var taskRepository: TaskRepository)
 
     val taskList = MutableLiveData<List<TodoTask>>();
     val unfiltereTask = mutableListOf<TodoTask>();
+    private val isLoading = AtomicBoolean(false) // AtomicBoolean to prevent re-entrance
+    private var isLoaded = false
+
+    private val mutex = Mutex()
 
 
     fun loadTodoList() {
-        viewModelScope.launch {
-            taskList.postValue(taskRepository.getAllTasks())
-            unfiltereTask.addAll(taskRepository.getAllTasks())
+        if (isLoading.compareAndSet(false, true)) {
+            viewModelScope.launch {
+                mutex.withLock {
+                    try {
+                        if (!isLoaded) { // Check if already loaded
+                            val tasks = taskRepository.getAllTasks()
+                            taskList.postValue(tasks.sortedByDescending {
+                                it.dueDate
+                            })
+
+                            if (unfiltereTask.isEmpty() || unfiltereTask.size<tasks.size) {
+                                unfiltereTask.clear()
+                                unfiltereTask.addAll(tasks.sortedByDescending {it.dueDate  })
+                            }
+
+                            //isLoaded = true
+                            Log.d("ok size", unfiltereTask.size.toString())
+                        }
+                    } finally {
+                        isLoading.set(false) // Reset the loading flag
+                    }
+                }
+            }
         }
     }
 
-    fun deleteTodoTask(id: Int) {
+    fun deleteTodoTask(task: TodoTask) {
         viewModelScope.launch {
-            taskRepository.deleteById(id)
+            taskRepository.deleteById(task.taskId)
+            taskRepository.insert(task.apply {
+                this.isCompleted = !this.isCompleted
+            })
 
         }
     }
@@ -40,6 +70,8 @@ class HomScreenViewModel @Inject constructor(var taskRepository: TaskRepository)
     var searchString = ""
 
     fun filterList(query: String) {
+        Log.d("ok", unfiltereTask.size.toString())
+
         searchString = query
         taskList.value = getFilteredTasks()
 //            unfiltereTask.filter {
@@ -59,13 +91,7 @@ class HomScreenViewModel @Inject constructor(var taskRepository: TaskRepository)
             is FilterOption.Status -> statusFilter = filterOption.option
             is FilterOption.Priority -> priorityFilter = filterOption.option
         }
-        taskList.value = getFilteredTasks()
-
-//            unfiltereTask.filter {
-//            (statusFilter == StatusOption.All || it.isCompleted == getStatusBoolean(statusFilter)) && (priorityFilter == PriorityOption.All || it.taskPriority.ordinal == getPriorityInteger(
-//                priorityFilter
-//            ))
-//        }
+        taskList.value = getFilteredTasks().sortedByDescending { it.dueDate }
 
     }
 

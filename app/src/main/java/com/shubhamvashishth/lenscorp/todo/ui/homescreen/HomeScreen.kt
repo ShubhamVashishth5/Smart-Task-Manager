@@ -1,5 +1,6 @@
 package com.shubhamvashishth.lenscorp.todo.ui.homescreen
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -13,10 +14,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -36,7 +39,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,7 +50,11 @@ import androidx.navigation.NavController
 import com.shubhamvashishth.lenscorp.todo.ui.common.TaskCard
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(navController: NavController) {
     val viewModel: HomScreenViewModel = hiltViewModel()
@@ -69,12 +79,14 @@ fun HomeScreen(navController: NavController) {
 
         Box(modifier = Modifier.fillMaxSize()) {
             LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Adaptive(200.dp),
+                columns = StaggeredGridCells.Adaptive((LocalConfiguration.current.screenWidthDp/2.2).dp),
                 verticalItemSpacing = 4.dp,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 content = {
                     taskList.forEach { task ->
-                        item(key = task.taskId) {
+
+                        Log.d("ok time", task.dueDate.toString())
+                        item(key = task.hashCode()) {
                             var isVisible by remember { mutableStateOf(true) }
 
                             AnimatedVisibility(
@@ -90,21 +102,22 @@ fun HomeScreen(navController: NavController) {
                             ) {
                                 TaskCard(
                                     title = task.title,
-                                    dateTime = task.dueDate.toString(),
+                                    dateTime = formatDate(task.dueDate),
                                     priority = task.taskPriority,
                                     description = task.description,
                                     location = task.location,
                                     onCheckboxChange = {
                                         coroutineScope.launch {
-                                            isVisible = false
+                                         //   isVisible = false
                                             delay(300) // Match the duration of the exit animation
-                                            viewModel.deleteTodoTask(task.taskId) // Remove the task after animation completes
+                                            viewModel.deleteTodoTask(task) // Remove the task after animation completes
                                         }
                                     },
                                     onCardClick = {
                                         navController.navigate("edit/${task.taskId}")
                                         // Handle card click
-                                    }
+                                    },
+                                    isDefaultChecked = task.isCompleted
                                 )
                             }
                         }
@@ -150,10 +163,14 @@ fun Header(
             }
             Box(
                 modifier = Modifier
-                    .background(Color.Gray.copy(alpha = 0.1f))
-                    .border(1.dp, Color.Gray)
+                    .height(40.dp)
+                    .background(Color.White, shape = RoundedCornerShape(8.dp))
+                    .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
                     .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(), contentAlignment = Alignment.Center
+                     // Clip the Box with rounded corners
+
+
             ) {
                 BasicTextField(
                     value = searchQuery,
@@ -255,14 +272,18 @@ enum class StatusOption(val label: String) {
 @Composable
 fun PreviewHeader() {
 
-//        Header(
-//            onSearchQueryChange = { query -> /* Handle search query */ },
-//            onFilterOptionSelected = { filterOption -> /* Handle filter option */ }
-//
-//        )
+        Header(
+            onSearchQueryChange = { query -> /* Handle search query */ },
+            onFilterOptionSelected = { filterOption -> /* Handle filter option */ }
+
+        )
 
 }
 
+fun formatDate(date: Date): String {
+    val outputFormat = SimpleDateFormat("EEEE, MMM dd yyyy, h:mm a", Locale.ENGLISH)
+    return outputFormat.format(date)
+}
 // Preview function
 
 

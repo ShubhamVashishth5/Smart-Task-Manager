@@ -3,6 +3,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.EventLogTags.Description
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -25,31 +26,25 @@ class NotificationWorker (
     workerParams: WorkerParameters,
 ) : Worker(context, workerParams) {
 
-    @Inject
-    lateinit var taskRepository : TaskRepository
+
 
     override fun doWork(): Result {
         // Retrieve the task ID from input data
-        val taskId = inputData.getString("TASK_ID") ?: return Result.failure()
+        val title = inputData.getString("TASK_TITLE") ?: return Result.failure()
+        val description = inputData.getString("TASK_DESC") ?: return Result.failure()
 
         // Fetch data from database
-        val task = runBlocking {
-            fetchTaskFromDatabase(taskId)
-        } ?: return Result.failure()
+
 
         // Create and show notification
-        showNotification(task)
+        showNotification(title,description)
 
         return Result.success()
     }
 
-    private suspend fun fetchTaskFromDatabase(taskId: String): TodoTask? {
-        return withContext(Dispatchers.IO) {
-            taskRepository.getTaskById(taskId.toInt())
-        }
-    }
 
-    private fun showNotification(task: TodoTask) {
+
+    private fun showNotification(title:String, description: String) {
         val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "task_notifications"
 
@@ -68,13 +63,13 @@ class NotificationWorker (
         )
 
         val notification = NotificationCompat.Builder(applicationContext, channelId)
-            .setContentTitle(task.title)
-            .setContentText(task.description)
+            .setContentTitle(title)
+            .setContentText(description)
             .setSmallIcon(R.drawable.ic_launcher_background) // Replace with your notification icon
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 
-        notificationManager.notify(task.taskId.hashCode(), notification)
+        notificationManager.notify(title.hashCode(), notification)
     }
 }

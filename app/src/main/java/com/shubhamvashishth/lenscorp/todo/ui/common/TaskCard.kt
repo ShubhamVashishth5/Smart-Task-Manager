@@ -33,9 +33,10 @@ fun TaskCard(
     location: String,
     onCheckboxChange: (Boolean) -> Unit,
     onCardClick: () -> Unit,
+    isDefaultChecked: Boolean
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    var isChecked by remember { mutableStateOf(false) }
+    var isChecked by remember { mutableStateOf(isDefaultChecked) }
 
     Card(
         modifier = Modifier
@@ -78,35 +79,41 @@ fun TaskCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { isExpanded = !isExpanded },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = if (isExpanded) "Show less" else "Show more",
-                    color = MaterialTheme.colors.primary
-                )
-                Icon(
-                    imageVector = if (isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                    contentDescription = null
-                )
+            if(description!=""||location!=""){
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { isExpanded = !isExpanded },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = if (isExpanded) "Show less" else "Show more",
+                        color = MaterialTheme.colors.primary
+                    )
+                    Icon(
+                        imageVector = if (isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                        contentDescription = null
+                    )
+                }
             }
 
             if (isExpanded) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = description,
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Text(
-                    text = "Location: $location",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
+                if(description!=""){
+                    Text(
+                        text = description,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+                if(location!=""){
+                    Text(
+                        text = "Location: $location",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
             }
         }
     }
@@ -138,7 +145,8 @@ fun PreviewTaskCard() {
         description = "This is a detailed description of the task that is expanded when the card is clicked.",
         location = "123 Main St, Anytown",
         onCheckboxChange = {},
-        onCardClick = {}
+        onCardClick = {},
+        true
     )
 }
 

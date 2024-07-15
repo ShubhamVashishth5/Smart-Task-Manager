@@ -130,7 +130,7 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsScreenViewMo
                 checked = locationRemindersEnabled,
                 onCheckedChange = { enabled ->
                     if (enabled) {
-                        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                        locationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                     } else {
                         viewModel.setLocationRemindersEnabled(false)
                     }

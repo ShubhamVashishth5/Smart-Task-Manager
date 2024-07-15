@@ -3,7 +3,9 @@ package com.shubhamvashishth.lenscorp.todo.ui.addtask
 import NotificationWorker
 import android.Manifest
 import android.app.Activity
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
 import android.util.Log
@@ -38,8 +40,14 @@ import com.adevinta.leku.TIME_ZONE_ID
 import com.adevinta.leku.TRANSITION_BUNDLE
 import com.adevinta.leku.ZIPCODE
 import com.adevinta.leku.locale.SearchZoneRect
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofenceStatusCodes
+import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
+import com.shubhamvashishth.lenscorp.todo.GeofenceBroadcastReceiver
+import com.shubhamvashishth.lenscorp.todo.data.model.TodoTask
 import com.shubhamvashishth.lenscorp.todo.ui.common.TodoTaskForm
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -58,9 +66,36 @@ fun AddEditTaskScreen(navController: NavController){
         mutableStateOf(LatLng(0.0,0.0))
     }
 
+
+
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     var currentLocation by remember { mutableStateOf<LatLng?>(null) }
+
+    val geofencingClient = LocationServices.getGeofencingClient(context)
+
+    val geofence = Geofence.Builder()
+        .setRequestId("geofence_id2")
+        .setCircularRegion(currentLocation?.latitude?:0.0, currentLocation?.longitude?:0.0, 1f)
+        .setExpirationDuration(Geofence.NEVER_EXPIRE)
+        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+        .build()
+
+    val geofencingRequest = GeofencingRequest.Builder()
+        .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
+        .addGeofence(geofence)
+        .build()
+
+    val geofencePendingIntent: PendingIntent by lazy {
+        val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
+        PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
 
     val lekuActivityResultLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -76,22 +111,7 @@ fun AddEditTaskScreen(navController: NavController){
             val address = data?.getStringExtra(LOCATION_ADDRESS)
             location= address?:""
             Log.d("ADDRESS****", address.toString())
-            val postalcode = data?.getStringExtra(ZIPCODE)
-            Log.d("POSTALCODE****", postalcode.toString())
-            val bundle = data?.getBundleExtra(TRANSITION_BUNDLE)
-            Log.d("BUNDLE TEXT****", bundle?.getString("test").toString())
-            val fullAddress = data?.getParcelableExtra<Address>(ADDRESS)
-            if (fullAddress != null) {
-                Log.d("FULL ADDRESS****", fullAddress.toString())
-            }
-            val timeZoneId = data?.getStringExtra(TIME_ZONE_ID)
-            if (timeZoneId != null) {
-                Log.d("TIME ZONE ID****", timeZoneId)
-            }
-            val timeZoneDisplayName = data?.getStringExtra(TIME_ZONE_DISPLAY_NAME)
-            if (timeZoneDisplayName != null) {
-                Log.d("TIME ZONE NAME****", timeZoneDisplayName)
-            }
+
         } else {
             Log.d("RESULT****", "CANCELLED")
         }
@@ -124,9 +144,6 @@ fun AddEditTaskScreen(navController: NavController){
                 .withGooglePlacesApiKey("AIzaSyCx36Z4o7Nl-ZSptkrbwmDqJdcS2T5coq8")
                 .withSearchZone(SearchZoneRect(LatLng(currentLocation!!.latitude, currentLocation!!.longitude), LatLng(currentLocation!!.latitude, currentLocation!!.longitude)))
                 .withDefaultLocaleSearchZone()
-//                .shouldReturnOkOnBackPressed()
-//                .withStreetHidden()
-//                .withCityHidden()
                 .withZipCodeHidden()
                 .withSatelliteViewHidden()
                 .withGooglePlacesEnabled()
@@ -139,20 +156,28 @@ fun AddEditTaskScreen(navController: NavController){
         TodoTaskForm(onSave = { task->
             editAddTaskViewModel.saveTo(task)
             navController.popBackStack()
-            scheduleNotification(context, task.taskId.toString(), getTimeRemainingInMillis(task.dueDate) )
+            scheduleNotification(context, task, getTimeRemainingInMillis(task.dueDate) )
+
+            geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)
+                .addOnSuccessListener {
+                    Log.d("ok geo", "Geofence added successfully")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Geofence", "Failed to add geofence", e)
+                    // Additional debugging information
+                    if (e is ApiException) {
+                        when (e.statusCode) {
+                            GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE -> Log.e("Geofence", "Geofence service not available")
+                            GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES -> Log.e("Geofence", "Too many geofences")
+                            GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS -> Log.e("Geofence", "Too many pending intents")
+                            else -> Log.e("Geofence", "Unknown geofence error")
+                        }
+                    }}
 
         }, onCancel = {
             navController.popBackStack()
         }, onLocationClicked = { lekuActivityResultLauncher.launch(locationPickerIntent) }, location = location, latLng = latLng )
 
-        Column {
-            Button(onClick = { lekuActivityResultLauncher.launch(locationPickerIntent) }) {
-                Text("Pick Location")
-            }
-            Text(text = "Current Location: ${currentLocation!!.latitude}, ${currentLocation!!.longitude}")
-        }
-    } else {
-        Text(text = "Getting current location...")
     }
 
 }
@@ -167,17 +192,26 @@ fun getTimeRemainingInMillis(targetDate: Date): Long {
 }
 
 
-fun scheduleNotification(context: Context, taskId: String, triggerTime: Long) {
+fun scheduleNotification(context: Context, task: TodoTask, triggerTime: Long) {
     Log.d("ok noti", triggerTime.toString())
-    val workRequest = OneTimeWorkRequest.Builder(NotificationWorker::class.java)
-        .setInitialDelay(0 , TimeUnit.MILLISECONDS)
-        .setInputData(
-            Data.Builder()
-                .putString("TASK_ID", taskId)
-                .build()
-        )
-        .build()
+    if (triggerTime.toInt() !=0){
+        val workRequest = OneTimeWorkRequest.Builder(NotificationWorker::class.java)
+            .setInitialDelay(triggerTime , TimeUnit.MILLISECONDS)
+            .setInputData(
+                Data.Builder()
+                    .putString("TASK_TITLE", task.title)
+                    .putString("TASK_DESC", task.description)
+                    .build()
+            )
+            .build()
 
-    WorkManager.getInstance(context).enqueue(workRequest)
+        WorkManager.getInstance(context).enqueue(workRequest)
+    }
+
 }
+
+
+
+
+
 
