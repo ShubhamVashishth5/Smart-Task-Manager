@@ -40,9 +40,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.shubhamvashishth.lenscorp.todo.ui.common.BottomBar
+import com.shubhamvashishth.lenscorp.todo.ui.navigation.ADD_ROUTE
 import com.shubhamvashishth.lenscorp.todo.ui.navigation.SetupNavGraph
 import com.shubhamvashishth.lenscorp.todo.ui.theme.SmartTaskManagerTheme
 import dagger.hilt.android.AndroidEntryPoint
+import shouldShowFab
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
@@ -89,21 +91,16 @@ private fun showBiometricPrompt(context: Context, function: () -> Unit) {
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
             super.onAuthenticationError(errorCode, errString)
             context.finishAffinity()
-
-            // Handle error
         }
 
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
             super.onAuthenticationSucceeded(result)
             function.invoke()
-            // Handle success
         }
 
         override fun onAuthenticationFailed() {
             super.onAuthenticationFailed()
             context.finishAffinity()
-            // Handle failure
-
         }
     })
 
@@ -142,7 +139,6 @@ fun MainScreen() {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination?.route
-    Log.d("ok",currentDestination.toString())
 
 if(isAuthenticated){
     Scaffold(
@@ -154,7 +150,7 @@ if(isAuthenticated){
                 FloatingActionButton(
                     onClick = {
                         // Handle FAB click
-                        navController.navigate("add")
+                        navController.navigate(ADD_ROUTE)
 
                     },
                     modifier = Modifier
@@ -167,29 +163,13 @@ if(isAuthenticated){
 
     ) {
             paddingValues ->
-        // Apply padding manually
         Box(modifier = Modifier.padding(bottom = 40.dp)) {
             SetupNavGraph(navHostController = navController)
         }
     }}
 }
 
-@Composable
-fun TopAppBar(navController: NavHostController){
-    var ok by remember{ mutableStateOf("") }
-    Box(contentAlignment = Alignment.Center, modifier = Modifier
-        .height(50.dp)
-        .fillMaxWidth()){
-        Column{
-            Text(text = "ReadPin",  fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,)
-            //  TextField(value = ok, onValueChange = { ok= it } )
-        }
-    }
-}
 
 
-fun shouldShowFab(currentDestination: String?): Boolean {
-    val fabVisibleDestinations = listOf("home_screen") // Add paths where FAB should be visible
-    return currentDestination in fabVisibleDestinations
-}
+
+

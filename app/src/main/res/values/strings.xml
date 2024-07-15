@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Smart Task Manager</string>
+    <string name="task_completion_by_priority">Task Completion by Priority</string>
+
 </resources>

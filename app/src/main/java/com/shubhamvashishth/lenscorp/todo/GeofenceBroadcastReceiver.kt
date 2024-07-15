@@ -9,7 +9,6 @@ import androidx.core.app.NotificationCompat
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("ok geo", "reached here")
         GeofenceTransitionsJobIntentService.enqueueWork(context, intent)
     }
 }

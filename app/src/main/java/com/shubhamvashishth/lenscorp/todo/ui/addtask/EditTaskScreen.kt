@@ -34,6 +34,8 @@ import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.shubhamvashishth.lenscorp.todo.GeofenceBroadcastReceiver
+import com.shubhamvashishth.lenscorp.todo.helper.GEOFENCE_ID
+import com.shubhamvashishth.lenscorp.todo.helper.TAG_GEOFENCE
 import com.shubhamvashishth.lenscorp.todo.ui.common.TodoTaskForm
 
 @SuppressLint("MissingPermission")
@@ -65,7 +67,7 @@ fun EditTaskScreen(navController: NavController, id: Int) {
     val geofencingClient = LocationServices.getGeofencingClient(context)
 
     val geofence = Geofence.Builder()
-        .setRequestId("geofence_id2")
+        .setRequestId(GEOFENCE_ID+(task.value?.taskId?:""))
         .setCircularRegion(
             task.value?.latLng?.latitude ?: 0.0,
             task.value?.latLng?.latitude ?: 0.0,
@@ -140,7 +142,6 @@ fun EditTaskScreen(navController: NavController, id: Int) {
         TodoTaskForm(
             task.value,
             onSave = { task ->
-                Log.d("ok", task.taskId.toString())
                 editAddTaskViewModel.deleteTodoTask(id)
                 editAddTaskViewModel.saveTo(task)
                 navController.popBackStack()
@@ -149,31 +150,11 @@ fun EditTaskScreen(navController: NavController, id: Int) {
 
                 geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)
                     .addOnSuccessListener {
-                        Log.d("ok geo", "Geofence added successfully")
+                        Log.d(TAG_GEOFENCE,"Geofence added successfully")
                     }
                     .addOnFailureListener { e ->
-                        Log.e("Geofence", "Failed to add geofence", e)
-                        // Additional debugging information
-                        if (e is ApiException) {
-                            when (e.statusCode) {
-                                GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE -> Log.e(
-                                    "Geofence",
-                                    "Geofence service not available"
-                                )
+                        Log.e(TAG_GEOFENCE, "Failed to add geofence", e)
 
-                                GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES -> Log.e(
-                                    "Geofence",
-                                    "Too many geofences"
-                                )
-
-                                GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS -> Log.e(
-                                    "Geofence",
-                                    "Too many pending intents"
-                                )
-
-                                else -> Log.e("Geofence", "Unknown geofence error")
-                            }
-                        }
                     }
 
             },

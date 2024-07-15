@@ -43,7 +43,6 @@ fun TodoTaskForm(
     location: String="",
     latLng: LatLng= LatLng(0.0,0.0)
 ) {
-    Log.d("oks", task.toString())
     var taskPriority by remember(task?.hashCode()) {
         mutableStateOf(
             task?.taskPriority ?: Priority.LOW
@@ -62,8 +61,6 @@ fun TodoTaskForm(
     var taskId by remember(task?.hashCode()) { mutableStateOf(task?.taskId?:0) }
 
 
-
-    Log.d("oks", title.toString())
 
 
     Column(

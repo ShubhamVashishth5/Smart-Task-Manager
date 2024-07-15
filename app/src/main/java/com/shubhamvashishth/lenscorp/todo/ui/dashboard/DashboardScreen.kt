@@ -77,13 +77,13 @@ fun DashboardScreen(viewModel: DashboardScreenViewModel = hiltViewModel()) {
 private fun AddCustomPieChart(taskList: List<TodoTask>) {
 
     val low = taskList.count {
-        it.taskPriority == Priority.LOW
+        it.taskPriority == Priority.LOW && !it.isCompleted
     }.toFloat()
     val medium = taskList.count {
-        it.taskPriority == Priority.MEDIUM
+        it.taskPriority == Priority.MEDIUM && !it.isCompleted
     }.toFloat()
     val high = taskList.count {
-        it.taskPriority == Priority.HIGH
+        it.taskPriority == Priority.HIGH && !it.isCompleted
     }.toFloat()
 
     val pieColors = listOf(
@@ -165,8 +165,6 @@ private fun AddCustomStackedBarChart(taskList: List<TodoTask>) {
         )
     }
 
-
-    Log.d("ok", items.toString())
 
     val dataSet = MultiChartDataSet(
         items = items,

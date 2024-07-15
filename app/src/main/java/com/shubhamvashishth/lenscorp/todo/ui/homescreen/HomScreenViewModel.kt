@@ -44,11 +44,9 @@ class HomScreenViewModel @Inject constructor(var taskRepository: TaskRepository)
                                 unfiltereTask.addAll(tasks.sortedByDescending {it.dueDate  })
                             }
 
-                            //isLoaded = true
-                            Log.d("ok size", unfiltereTask.size.toString())
                         }
                     } finally {
-                        isLoading.set(false) // Reset the loading flag
+                        isLoading.set(false)
                     }
                 }
             }
@@ -70,7 +68,6 @@ class HomScreenViewModel @Inject constructor(var taskRepository: TaskRepository)
     var searchString = ""
 
     fun filterList(query: String) {
-        Log.d("ok", unfiltereTask.size.toString())
 
         searchString = query
         taskList.value = getFilteredTasks()
@@ -101,7 +98,7 @@ class HomScreenViewModel @Inject constructor(var taskRepository: TaskRepository)
     }
 
     private fun getStatusBoolean(statusOption: StatusOption): Boolean {
-        return statusOption == StatusOption.Incomplete
+        return statusOption != StatusOption.Incomplete
     }
 
     private fun getPriorityInteger(priorityOption: PriorityOption): Int {

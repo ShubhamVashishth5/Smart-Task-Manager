@@ -38,6 +38,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.shubhamvashishth.lenscorp.todo.GeofenceBroadcastReceiver
 import com.shubhamvashishth.lenscorp.todo.data.model.TodoTask
+import com.shubhamvashishth.lenscorp.todo.helper.TAG_GEOFENCE
 import com.shubhamvashishth.lenscorp.todo.ui.common.TodoTaskForm
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -60,7 +61,7 @@ fun AddEditTaskScreen(navController: NavController){
 
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-    var currentLocation by remember { mutableStateOf<LatLng?>(null) }
+    var currentLocation by remember { mutableStateOf<LatLng?>(LatLng(41.4036299, 2.1743558)) }
 
     val geofencingClient = LocationServices.getGeofencingClient(context)
 
@@ -150,16 +151,16 @@ fun AddEditTaskScreen(navController: NavController){
 
             geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)
                 .addOnSuccessListener {
-                    Log.d("ok geo", "Geofence added successfully")
+                    Log.d(TAG_GEOFENCE, "Geofence added successfully")
                 }
                 .addOnFailureListener { e ->
-                    Log.e("Geofence", "Failed to add geofence", e)
+                    Log.e(TAG_GEOFENCE, "Failed to add geofence", e)
                     if (e is ApiException) {
                         when (e.statusCode) {
                             GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE -> Log.e("Geofence", "Geofence service not available")
                             GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES -> Log.e("Geofence", "Too many geofences")
                             GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS -> Log.e("Geofence", "Too many pending intents")
-                            else -> Log.e("Geofence", "Unknown geofence error")
+                            else -> Log.e(TAG_GEOFENCE, "Unknown geofence error")
                         }
                     }}
 
@@ -182,7 +183,6 @@ fun getTimeRemainingInMillis(targetDate: Date): Long {
 
 
 fun scheduleNotification(context: Context, task: TodoTask, triggerTime: Long) {
-    Log.d("ok noti", triggerTime.toString())
     if (triggerTime.toInt() !=0){
         val workRequest = OneTimeWorkRequest.Builder(NotificationWorker::class.java)
             .setInitialDelay(triggerTime , TimeUnit.MILLISECONDS)

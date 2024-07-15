@@ -147,20 +147,6 @@ fun PriorityIndicator(priority: Priority) {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewTaskCard() {
-    TaskCard(
-        title = "Sample Taskdsa ksahdiuas shdiusa hdiusa  hsdaiudhsa uhsaids",
-        dateTime = "2024-07-13 10:00 AM",
-        priority = Priority.HIGH,
-        description = "This is a detailed description of the task that is expanded when the card is clicked.",
-        location = "123 Main St, Anytown",
-        onCheckboxChange = {},
-        onCardClick = {},
-        true
-    )
-}
 
 @Composable
 fun CircularCheckbox(

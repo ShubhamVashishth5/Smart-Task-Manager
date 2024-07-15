@@ -4,9 +4,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
 import androidx.work.WorkerFactory
+import com.shubhamvashishth.lenscorp.todo.MainApplication
 import com.shubhamvashishth.lenscorp.todo.data.dao.TaskDao
 import com.shubhamvashishth.lenscorp.todo.data.database.TaskDatabase
 import com.shubhamvashishth.lenscorp.todo.data.repository.TaskRepository
+import com.shubhamvashishth.lenscorp.todo.helper.DATABASE_NAME
+import com.shubhamvashishth.lenscorp.todo.helper.SHARED_PREF_NAME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,7 +28,7 @@ class DatabaseModule {
         return Room.databaseBuilder(
             appContext,
             TaskDatabase::class.java,
-            "app_database"
+            DATABASE_NAME
         ).build()
     }
 
@@ -44,7 +47,7 @@ class DatabaseModule {
     @Provides
     @Singleton
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences("settings_prefs", Context.MODE_PRIVATE)
+        return context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
     }
 
 

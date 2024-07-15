@@ -4,6 +4,10 @@ import androidx.room.TypeConverter
 import com.google.android.gms.maps.model.LatLng
 import java.util.Date
 
+/**
+ * Entity To Databasse converter Class
+ * @author Shubham Vashishth
+ */
 class Converters {
     @TypeConverter
     fun fromTimestamp(value: Long?): Date? {

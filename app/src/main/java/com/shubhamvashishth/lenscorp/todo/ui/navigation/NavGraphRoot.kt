@@ -18,8 +18,8 @@ fun SetupNavGraph(
         homeNavGraph(navHostController)
         dashboardNavGraph(navHostController)
         settingsNavGraph(navHostController)
-        composable("add") { AddEditTaskScreen(navHostController) }
-        composable("edit/{id}") {
+        composable(ADD_ROUTE) { AddEditTaskScreen(navHostController) }
+        composable(EDIT_ROUTE) {
                 backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()?:0
             EditTaskScreen(navHostController, id) }

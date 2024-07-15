@@ -2,6 +2,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import com.hd.charts.style.ChartViewDefaults
 import com.hd.charts.style.ChartViewStyle
+import com.shubhamvashishth.lenscorp.todo.MainApplication
 import com.shubhamvashishth.lenscorp.todo.data.model.Priority
 import com.shubhamvashishth.lenscorp.todo.data.model.TodoTask
 import java.text.SimpleDateFormat
@@ -9,12 +10,21 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-
+/**
+ * Format date from UNIX format to Readable format
+ * @return convertedString
+ */
 fun formatDate(date: Date): String {
     val outputFormat = SimpleDateFormat("EEEE, MMM dd yyyy, h:mm a", Locale.ENGLISH)
     return outputFormat.format(date)
 }
 
+/**
+ * Get completed tasks in last 4 months, with categories for priorities and their count in each of them
+ * @param taskList : List of tasks
+ * @return Map<String, Map<Priority, Float>>
+ *
+ */
 fun getCompletedTasksByMonth(taskList: List<TodoTask>): Map<String, Map<Priority, Float>> {
     val calendar = Calendar.getInstance()
     val today = calendar.time
@@ -55,7 +65,9 @@ fun getCompletedTasksByMonth(taskList: List<TodoTask>): Map<String, Map<Priority
     return result
 }
 
-
+/**
+ * Style object for charts
+ */
 object ChartViewDemoStyle {
 
     @Composable
@@ -66,7 +78,11 @@ object ChartViewDemoStyle {
     }
 }
 
-
+/**
+ * Function to return the tasks completed in last 6 weeks
+ * @param tasks: List of tasks
+ * @return List<Int> with task completed in each of last 6 weeks
+ */
 fun getCompletedTasksCountPerWeek(tasks: List<TodoTask>): List<Int> {
     val calendar = Calendar.getInstance()
     calendar.add(Calendar.WEEK_OF_YEAR, -6)
@@ -92,4 +108,9 @@ fun getCompletedTasksCountPerWeek(tasks: List<TodoTask>): List<Int> {
     }
 
     return counts.toList()
+}
+
+fun shouldShowFab(currentDestination: String?): Boolean {
+    val fabVisibleDestinations = listOf("home_screen") // Add paths where FAB should be visible
+    return currentDestination in fabVisibleDestinations
 }

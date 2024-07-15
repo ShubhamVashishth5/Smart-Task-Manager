@@ -22,7 +22,6 @@ class GeofenceTransitionsJobIntentService : JobIntentService() {
     }
 
     override fun onHandleWork(intent: Intent) {
-        Log.d("ok geo", "inside the worker too")
         sendNotification()
 
         if (GeofencingEvent.fromIntent(intent)?.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
@@ -45,8 +44,8 @@ class GeofenceTransitionsJobIntentService : JobIntentService() {
 
         val notificationBuilder = NotificationCompat.Builder(this, "geofence_channel")
             .setSmallIcon(R.drawable.ic_launcher_background)
-            .setContentTitle("Geofence Alert")
-            .setContentText("Geofence transition detected")
+            .setContentTitle("Task location Alert")
+            .setContentText("You have reached a task location. Click here to open the app")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 

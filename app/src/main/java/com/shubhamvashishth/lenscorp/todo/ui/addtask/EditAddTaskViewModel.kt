@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EditAddTaskViewModel @Inject constructor(
-    var taskRepository: TaskRepository
+    private var taskRepository: TaskRepository
 ) : ViewModel() {
 
     var todoTask = MutableLiveData<TodoTask?>()
@@ -31,18 +31,10 @@ class EditAddTaskViewModel @Inject constructor(
 
     }
 
-    var edit: (TodoTask) -> Unit = { task ->
-
-        viewModelScope.launch {
-            taskRepository.replaceTask(task)
-        }
-
-    }
 
     fun loadTaskById(id: Int) {
         viewModelScope.launch {
             todoTask.postValue(taskRepository.getTaskById(id))
-            Log.d("OK", id.toString()+todoTask.value.toString())
         }
     }
 

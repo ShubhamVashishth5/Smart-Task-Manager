@@ -86,7 +86,6 @@ fun HomeScreen(navController: NavController) {
                 content = {
                     taskList.forEach { task ->
 
-                        Log.d("ok time", task.dueDate.toString())
                         item(key = task.hashCode()) {
                             var isVisible by remember { mutableStateOf(true) }
 
@@ -242,7 +241,6 @@ fun Header(
     }
 
     LaunchedEffect(searchQuery) {
-        Log.d("OKsss", searchQuery)
     }
 }
 
@@ -263,8 +261,8 @@ enum class PriorityOption(val label: String) {
 }
 
 enum class StatusOption(val label: String) {
-    Complete("Complete"),
     Incomplete("Incomplete"),
+    Complete("Complete"),
     All("All")
 }
 
