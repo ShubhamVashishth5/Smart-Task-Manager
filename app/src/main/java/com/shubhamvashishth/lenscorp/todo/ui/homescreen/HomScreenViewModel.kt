@@ -74,15 +74,7 @@ class HomScreenViewModel @Inject constructor(var taskRepository: TaskRepository)
 
         searchString = query
         taskList.value = getFilteredTasks()
-//            unfiltereTask.filter {
-//            it.title.contains(query, ignoreCase = true) || it.description.contains(
-//                query,
-//                ignoreCase = true
-//            )
-//        }
-//        if (query == "") {
-//            taskList.postValue(unfiltereTask)
-//        }
+
     }
 
     fun priorityAndStatusFilter(filterOption: FilterOption) {

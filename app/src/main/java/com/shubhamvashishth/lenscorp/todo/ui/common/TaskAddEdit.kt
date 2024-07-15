@@ -3,6 +3,7 @@ package com.shubhamvashishth.lenscorp.todo.ui.common
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,11 +15,13 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.ButtonColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.LatLng
@@ -55,7 +58,6 @@ fun TodoTaskForm(
             )
         )
     }
-    //  var location by remember { mutableStateOf<LatLng?>(null) }
     var editMode by remember(task?.hashCode()) { mutableStateOf(isEditable) }
     var taskId by remember(task?.hashCode()) { mutableStateOf(task?.taskId?:0) }
 
@@ -78,13 +80,7 @@ fun TodoTaskForm(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row {
-//                    IconButton(onClick = { editMode = !editMode }) {
-//                        Icon(
-//                            Icons.Filled.Edit,
-//                            contentDescription = if (editMode) "View Mode" else "Edit Mode",
-//                            tint = if (editMode) Color.Blue else Color.Gray
-//                        )
-//                    }
+
                     IconButton(onClick = { onCancel() }) {
                         Icon(
                             Icons.Filled.Close,
@@ -110,7 +106,7 @@ fun TodoTaskForm(
                         }
                         var task = TodoTask(
                             taskPriority,
-                            title.text,
+                            if(title.text=="")"Empty title" else title.text,
                             dueDate ?: Date(),
                             description.text,
                             false,
@@ -167,8 +163,6 @@ fun TodoTaskForm(
         Button(
             onClick = {
                 onLocationClicked.invoke()
-                // Launch Leku Location Picker
-                // onLocationSelected(selectedLocation) - handle location selected
             },
             enabled = editMode,
             modifier = Modifier.fillMaxWidth()
@@ -230,7 +224,6 @@ fun DateTimePickerField(date: Date?, onDateSelected: (Date) -> Unit, enabled: Bo
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
             .padding(8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

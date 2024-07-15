@@ -24,10 +24,6 @@ fun SetupNavGraph(
             val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()?:0
             EditTaskScreen(navHostController, id) }
 
-//        discoverNavGraph(navHostController)
-//        userNavGraph(navHostController)
-//        viewBookNavGraph(navHostController)
-//        viewAuthorNavGraph(navHostController)
     }
 
 }

@@ -38,10 +38,7 @@ fun BottomBar(navController: NavHostController) {
 
     AnimatedVisibility(
         visible = true
-//        visible = navController.currentDestination?.route !in
-//                listOf<String>(Screens.ViewBookById.route,
-//                    Screens.UserProfile.route,
-//                    Screens.ViewAuthorByID.route)
+
     ) {
         BottomNavigation {
             screens.forEach { screen ->

@@ -7,14 +7,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Address
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Button
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,20 +21,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
-import com.adevinta.leku.ADDRESS
 import com.adevinta.leku.LATITUDE
 import com.adevinta.leku.LOCATION_ADDRESS
 import com.adevinta.leku.LONGITUDE
 import com.adevinta.leku.LocationPickerActivity
-import com.adevinta.leku.TIME_ZONE_DISPLAY_NAME
-import com.adevinta.leku.TIME_ZONE_ID
-import com.adevinta.leku.TRANSITION_BUNDLE
-import com.adevinta.leku.ZIPCODE
 import com.adevinta.leku.locale.SearchZoneRect
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.Geofence
@@ -130,7 +120,7 @@ fun AddEditTaskScreen(navController: NavController){
                 currentLocation = if (location != null) {
                     LatLng(location.latitude, location.longitude)
                 } else {
-                    LatLng(41.4036299, 2.1743558) // Default to a known location if unable to get current location
+                    LatLng(41.4036299, 2.1743558)
                 }
             }
         }
@@ -164,7 +154,6 @@ fun AddEditTaskScreen(navController: NavController){
                 }
                 .addOnFailureListener { e ->
                     Log.e("Geofence", "Failed to add geofence", e)
-                    // Additional debugging information
                     if (e is ApiException) {
                         when (e.statusCode) {
                             GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE -> Log.e("Geofence", "Geofence service not available")
@@ -188,7 +177,7 @@ fun getTimeRemainingInMillis(targetDate: Date): Long {
     val targetTime = targetDate.time
     val timeRemaining = targetTime - currentTime
 
-    return maxOf(timeRemaining, 0) // Ensure we don't return a negative value if the target date is in the past
+    return maxOf(timeRemaining, 0)
 }
 
 

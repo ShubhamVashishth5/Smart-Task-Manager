@@ -1,6 +1,7 @@
 package com.shubhamvashishth.lenscorp.todo.ui.addtask
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
@@ -35,22 +36,25 @@ import com.google.android.gms.maps.model.LatLng
 import com.shubhamvashishth.lenscorp.todo.GeofenceBroadcastReceiver
 import com.shubhamvashishth.lenscorp.todo.ui.common.TodoTaskForm
 
+@SuppressLint("MissingPermission")
 @Composable
-fun EditTaskScreen(navController: NavController, id: Int){
+fun EditTaskScreen(navController: NavController, id: Int) {
 
-    var editAddTaskViewModel : EditAddTaskViewModel = hiltViewModel();
+    var editAddTaskViewModel: EditAddTaskViewModel = hiltViewModel();
 
 
     val task = editAddTaskViewModel.todoTask.observeAsState()
-    if (task.value==null) {  editAddTaskViewModel.loadTaskById(id)}
+    if (task.value == null) {
+        editAddTaskViewModel.loadTaskById(id)
+    }
 
 
     var location by remember {
-        mutableStateOf(task.value?.location?:"")
+        mutableStateOf(task.value?.location ?: "")
     }
 
     var latLng by remember {
-        mutableStateOf(LatLng(0.0,0.0))
+        mutableStateOf(LatLng(0.0, 0.0))
     }
 
     var currentLocation = task.value?.latLng
@@ -62,7 +66,11 @@ fun EditTaskScreen(navController: NavController, id: Int){
 
     val geofence = Geofence.Builder()
         .setRequestId("geofence_id2")
-        .setCircularRegion(task.value?.latLng?.latitude?:0.0, task.value?.latLng?.latitude?:0.0, 1f)
+        .setCircularRegion(
+            task.value?.latLng?.latitude ?: 0.0,
+            task.value?.latLng?.latitude ?: 0.0,
+            1f
+        )
         .setExpirationDuration(Geofence.NEVER_EXPIRE)
         .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
         .build()
@@ -93,9 +101,9 @@ fun EditTaskScreen(navController: NavController, id: Int){
             Log.d("LATITUDE****", latitude.toString())
             val longitude = data?.getDoubleExtra(LONGITUDE, 0.0)
             Log.d("LONGITUDE****", longitude.toString())
-            latLng = LatLng(latitude?:0.0, longitude?:0.0)
+            latLng = LatLng(latitude ?: 0.0, longitude ?: 0.0)
             val address = data?.getStringExtra(LOCATION_ADDRESS)
-            location= address?:""
+            location = address ?: ""
             Log.d("ADDRESS****", address.toString())
 
         } else {
@@ -109,7 +117,14 @@ fun EditTaskScreen(navController: NavController, id: Int){
                 .withLocation(currentLocation!!.latitude, currentLocation!!.longitude)
                 .withGeolocApiKey("AIzaSyCx36Z4o7Nl-ZSptkrbwmDqJdcS2T5coq8")
                 .withGooglePlacesApiKey("AIzaSyCx36Z4o7Nl-ZSptkrbwmDqJdcS2T5coq8")
-                .withSearchZone(SearchZoneRect(LatLng(currentLocation!!.latitude, currentLocation!!.longitude), LatLng(currentLocation!!.latitude, currentLocation!!.longitude)))
+                .withSearchZone(
+                    SearchZoneRect(
+                        LatLng(
+                            currentLocation!!.latitude,
+                            currentLocation!!.longitude
+                        ), LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
+                    )
+                )
                 .withDefaultLocaleSearchZone()
                 .withZipCodeHidden()
                 .withSatelliteViewHidden()
@@ -120,48 +135,57 @@ fun EditTaskScreen(navController: NavController, id: Int){
                 .build()
         }
 
-        var locationNew= if(location=="") task.value?.location else location
+        var locationNew = if (location == "") task.value?.location else location
 
-        TodoTaskForm(task.value,  onSave = { task->
-            Log.d("ok",task.taskId.toString())
-            editAddTaskViewModel.deleteTodoTask(id)
-            editAddTaskViewModel.saveTo(task)
-            navController.popBackStack()
-            scheduleNotification(context, task, getTimeRemainingInMillis(task.dueDate) )
+        TodoTaskForm(
+            task.value,
+            onSave = { task ->
+                Log.d("ok", task.taskId.toString())
+                editAddTaskViewModel.deleteTodoTask(id)
+                editAddTaskViewModel.saveTo(task)
+                navController.popBackStack()
+                scheduleNotification(context, task, getTimeRemainingInMillis(task.dueDate))
 
 
-            geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)
-                .addOnSuccessListener {
-                    Log.d("ok geo", "Geofence added successfully")
-                }
-                .addOnFailureListener { e ->
-                    Log.e("Geofence", "Failed to add geofence", e)
-                    // Additional debugging information
-                    if (e is ApiException) {
-                        when (e.statusCode) {
-                            GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE -> Log.e("Geofence", "Geofence service not available")
-                            GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES -> Log.e("Geofence", "Too many geofences")
-                            GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS -> Log.e("Geofence", "Too many pending intents")
-                            else -> Log.e("Geofence", "Unknown geofence error")
+                geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)
+                    .addOnSuccessListener {
+                        Log.d("ok geo", "Geofence added successfully")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("Geofence", "Failed to add geofence", e)
+                        // Additional debugging information
+                        if (e is ApiException) {
+                            when (e.statusCode) {
+                                GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE -> Log.e(
+                                    "Geofence",
+                                    "Geofence service not available"
+                                )
+
+                                GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES -> Log.e(
+                                    "Geofence",
+                                    "Too many geofences"
+                                )
+
+                                GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS -> Log.e(
+                                    "Geofence",
+                                    "Too many pending intents"
+                                )
+
+                                else -> Log.e("Geofence", "Unknown geofence error")
+                            }
                         }
-                    }}
+                    }
 
-        }, onCancel = {
-            navController.popBackStack()
-        }, onLocationClicked = { lekuActivityResultLauncher.launch(locationPickerIntent) }, location = locationNew?:"", latLng = latLng )
+            },
+            onCancel = {
+                navController.popBackStack()
+            },
+            onLocationClicked = { lekuActivityResultLauncher.launch(locationPickerIntent) },
+            location = locationNew ?: "",
+            latLng = latLng
+        )
 
     }
-
-//    TodoTaskForm(task.value, onSave = { task->
-//        Log.d("ok",task.taskId.toString())
-//        editAddTaskViewModel.deleteTodoTask(id)
-//        editAddTaskViewModel.saveTo(task)
-//     //   editAddTaskViewModel.edit(task)
-//        navController.popBackStack()
-//
-//    }, onCancel = {
-//        navController.popBackStack()
-//    }, onLocationClicked = {})
 
 }
 

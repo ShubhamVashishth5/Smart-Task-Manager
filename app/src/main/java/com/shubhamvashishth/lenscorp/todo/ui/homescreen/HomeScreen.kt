@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.shubhamvashishth.lenscorp.todo.ui.common.TaskCard
+import formatDate
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -185,7 +186,6 @@ fun Header(
 
         }
 
-        // Show nested dropdown if needed
         if (showDropdown) {
             DropdownMenu(
                 expanded = showDropdown,
@@ -280,10 +280,5 @@ fun PreviewHeader() {
 
 }
 
-fun formatDate(date: Date): String {
-    val outputFormat = SimpleDateFormat("EEEE, MMM dd yyyy, h:mm a", Locale.ENGLISH)
-    return outputFormat.format(date)
-}
-// Preview function
 
 

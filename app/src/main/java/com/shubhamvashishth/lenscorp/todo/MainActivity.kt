@@ -3,21 +3,15 @@ package com.shubhamvashishth.lenscorp.todo
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,22 +32,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.android.gms.location.Geofence
-import com.google.android.gms.location.GeofencingRequest
-import com.google.android.gms.location.LocationServices
 import com.shubhamvashishth.lenscorp.todo.ui.common.BottomBar
 import com.shubhamvashishth.lenscorp.todo.ui.navigation.SetupNavGraph
 import com.shubhamvashishth.lenscorp.todo.ui.theme.SmartTaskManagerTheme
-import dagger.hilt.EntryPoint
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -72,70 +61,13 @@ class MainActivity : FragmentActivity() {
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
-        //sendTestNotification()
 
 
-//
-//        val geofence = Geofence.Builder()
-//            .setRequestId("geofence_id")
-//            .setCircularRegion(28.6969,77.2938, 100f) // Increased radius for testing
-//            .setExpirationDuration(Geofence.NEVER_EXPIRE)
-//            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
-//            .build()
-//
-//        val geofencingRequest = GeofencingRequest.Builder()
-//            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-//            .addGeofence(geofence)
-//            .build()
-//
-//        val geofencePendingIntent: PendingIntent = PendingIntent.getBroadcast(
-//            this,
-//            0,
-//            Intent(this, GeofenceBroadcastReceiver::class.java).apply {
-//                action = "com.google.android.gms.location.Geofence"
-//            },
-//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//        )
-//
-//
-//        val geofencingClient = LocationServices.getGeofencingClient(this)
-//        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)
-//            .addOnSuccessListener {
-//                Log.d("Geofence", "Geofence added successfully")
-//            }
-//            .addOnFailureListener { e ->
-//                Log.e("Geofence", "Failed to add geofence", e)
-//            }
-
-
-        //enableEdgeToEdge()
         setContent {
             SmartTaskManagerTheme {
                MainScreen()
             }
         }
-    }
-    private fun sendTestNotification() {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = "task_notifications"
-
-        val intent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Test Notification")
-            .setContentText("This is a test notification to verify channel setup.")
-            .setSmallIcon(R.drawable.ic_launcher_background) // Ensure you have this drawable resource
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .build()
-
-        notificationManager.notify(1, notification)
     }
 
 
@@ -150,22 +82,26 @@ private fun isBiometricAvailable(context: Context): Boolean {
     }
 }
 
-private fun showBiometricPrompt(context: Context) {
+private fun showBiometricPrompt(context: Context, function: () -> Unit) {
     val executor = ContextCompat.getMainExecutor(context)
 
     val biometricPrompt = BiometricPrompt(context as FragmentActivity, executor, object : BiometricPrompt.AuthenticationCallback() {
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
             super.onAuthenticationError(errorCode, errString)
+            context.finishAffinity()
+
             // Handle error
         }
 
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
             super.onAuthenticationSucceeded(result)
+            function.invoke()
             // Handle success
         }
 
         override fun onAuthenticationFailed() {
             super.onAuthenticationFailed()
+            context.finishAffinity()
             // Handle failure
 
         }
@@ -184,10 +120,22 @@ private fun showBiometricPrompt(context: Context) {
 @Composable
 fun MainScreen() {
     val context = LocalContext.current as FragmentActivity
+    val biometricEnabled = remember { mutableStateOf(false) }
+
+
+    var isAuthenticated by remember {
+        mutableStateOf(false)
+    }
 
     LaunchedEffect(Unit) {
-        if (isBiometricAvailable(context)) {
-            showBiometricPrompt(context)
+        val sharedPreferences = context.getSharedPreferences("settings_prefs", Context.MODE_PRIVATE)
+        biometricEnabled.value = sharedPreferences.getBoolean("biometric_enabled", false)
+
+        if(biometricEnabled.value== false){
+            isAuthenticated=true
+        }
+        else if (isBiometricAvailable(context)) {
+            showBiometricPrompt(context) { isAuthenticated = true }
         }
     }
     val navController = rememberNavController()
@@ -196,7 +144,7 @@ fun MainScreen() {
     val currentDestination = navBackStackEntry?.destination?.route
     Log.d("ok",currentDestination.toString())
 
-
+if(isAuthenticated){
     Scaffold(
         bottomBar = {
             BottomBar(navController = navController) },
@@ -223,7 +171,7 @@ fun MainScreen() {
         Box(modifier = Modifier.padding(bottom = 40.dp)) {
             SetupNavGraph(navHostController = navController)
         }
-    }
+    }}
 }
 
 @Composable

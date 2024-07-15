@@ -37,7 +37,7 @@ class DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideTaskRepository(taskDao: TaskDao): TaskRepository{
+    fun provideTaskRepository(taskDao: TaskDao): TaskRepository {
         return TaskRepository(taskDao)
     }
 
@@ -46,14 +46,6 @@ class DatabaseModule {
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences("settings_prefs", Context.MODE_PRIVATE)
     }
-
-//    @Provides
-//    @Singleton
-//    fun provideWorkerFactory(
-//        taskRepositoryProvider: Provider<TaskRepository>
-//    ): WorkerFactory {
-//        return NotificationWorkerFactory(taskRepositoryProvider)
-//    }
 
 
 }
